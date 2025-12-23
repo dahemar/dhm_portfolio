@@ -148,9 +148,6 @@
       .projects {
         gap: 16px;
       }
-      .preview {
-        aspect-ratio: 5 / 6;
-      }
     }
     @media (prefers-reduced-motion: reduce) {
       * {
@@ -240,29 +237,73 @@
     <p class="note">if the preview does not load, please open the link.</p>
   </main>
   <script>
-    // Lazy-load iframes when they approach the viewport to reduce initial load cost.
+    // Lazy-load iframes and, on mobile, render them as scaled snapshots of a normal mobile viewport.
     (function() {
       const iframes = document.querySelectorAll('iframe[data-src]');
+      const TARGET_WIDTH = 430;   // typical mobile viewport width to simulate
+      const TARGET_HEIGHT = 760;  // typical mobile viewport height to simulate
+      const MOBILE_MAX = 640;
+      const PADDING_MOBILE = 40;  // matches body padding on mobile
+      let resizeTimer;
+
+      function applyScaling() {
+        const vw = window.innerWidth;
+        const isMobile = vw <= MOBILE_MAX;
+        iframes.forEach((frame) => {
+          const container = frame.parentElement;
+          if (!container) return;
+          if (!isMobile) {
+            frame.style.width = '100%';
+            frame.style.height = '100%';
+            frame.style.transform = '';
+            frame.style.transformOrigin = '';
+            container.style.height = '';
+            container.style.aspectRatio = '16 / 9';
+            return;
+          }
+          const available = Math.max(260, vw - PADDING_MOBILE * 2);
+          const scale = Math.min(1, available / TARGET_WIDTH);
+          frame.style.width = `${TARGET_WIDTH}px`;
+          frame.style.height = `${TARGET_HEIGHT}px`;
+          frame.style.transform = `scale(${scale})`;
+          frame.style.transformOrigin = 'top left';
+          container.style.height = `${TARGET_HEIGHT * scale}px`;
+          container.style.aspectRatio = 'auto';
+        });
+      }
+
+      function loadFrame(frame) {
+        if (!frame.src) frame.src = frame.dataset.src;
+      }
+
       if (!('IntersectionObserver' in window)) {
-        iframes.forEach((frame) => frame.src = frame.dataset.src);
+        iframes.forEach(loadFrame);
+        applyScaling();
         return;
       }
+
       const observer = new IntersectionObserver((entries) => {
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
             const frame = entry.target;
-            frame.src = frame.dataset.src;
+            loadFrame(frame);
             observer.unobserve(frame);
           }
         });
       }, { rootMargin: '200px 0px' });
+
       iframes.forEach((frame) => observer.observe(frame));
+
       // Fallback: ensure they load after a short delay if not intersected (very short pages).
       setTimeout(() => {
-        iframes.forEach((frame) => {
-          if (!frame.src) frame.src = frame.dataset.src;
-        });
+        iframes.forEach(loadFrame);
       }, 3000);
+
+      applyScaling();
+      window.addEventListener('resize', () => {
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(applyScaling, 150);
+      });
     })();
   </script>
 </body>
