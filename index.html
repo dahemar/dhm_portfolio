@@ -4,6 +4,18 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>web design portfolio - david herrero martí</title>
+  <link rel="dns-prefetch" href="https://alphonse-f.vercel.app/">
+  <link rel="dns-prefetch" href="https://www.joancolomer.com/">
+  <link rel="dns-prefetch" href="https://expensivemusic.com/">
+  <link rel="dns-prefetch" href="https://jonasjusten.com/">
+  <link rel="dns-prefetch" href="https://sympaathy.com/">
+  <link rel="dns-prefetch" href="https://cconnttacctto.xyz/">
+  <link rel="preconnect" href="https://alphonse-f.vercel.app/" crossorigin>
+  <link rel="preconnect" href="https://www.joancolomer.com/" crossorigin>
+  <link rel="preconnect" href="https://expensivemusic.com/" crossorigin>
+  <link rel="preconnect" href="https://jonasjusten.com/" crossorigin>
+  <link rel="preconnect" href="https://sympaathy.com/" crossorigin>
+  <link rel="preconnect" href="https://cconnttacctto.xyz/" crossorigin>
   <meta property="og:title" content="web design portfolio - david herrero martí">
   <meta property="og:description" content="Minimal single-page web design portfolio by David Herrero Martí.">
   <meta property="og:type" content="website">
@@ -175,7 +187,7 @@
             alphonse-f.vercel.app
           </a>
           <div class="preview">
-            <iframe src="https://alphonse-f.vercel.app/" loading="lazy" sandbox="allow-same-origin allow-scripts allow-forms allow-popups" title="preview of alphonse-f.vercel.app"></iframe>
+            <iframe data-src="https://alphonse-f.vercel.app/" loading="lazy" sandbox="allow-same-origin allow-scripts allow-forms allow-popups" title="preview of alphonse-f.vercel.app" fetchpriority="low"></iframe>
           </div>
         </article>
 
@@ -184,7 +196,7 @@
             joancolomer.com
           </a>
           <div class="preview">
-            <iframe src="https://www.joancolomer.com/work/edits" loading="lazy" sandbox="allow-same-origin allow-scripts allow-forms allow-popups" title="preview of joancolomer.com — work/edits"></iframe>
+            <iframe data-src="https://www.joancolomer.com/work/edits" loading="lazy" sandbox="allow-same-origin allow-scripts allow-forms allow-popups" title="preview of joancolomer.com — work/edits" fetchpriority="low"></iframe>
           </div>
         </article>
 
@@ -193,7 +205,7 @@
             expensivemusic.com
           </a>
           <div class="preview">
-            <iframe src="https://expensivemusic.com/" loading="lazy" sandbox="allow-same-origin allow-scripts allow-forms allow-popups" title="preview of expensivemusic.com"></iframe>
+            <iframe data-src="https://expensivemusic.com/" loading="lazy" sandbox="allow-same-origin allow-scripts allow-forms allow-popups" title="preview of expensivemusic.com" fetchpriority="low"></iframe>
           </div>
         </article>
 
@@ -202,7 +214,7 @@
             jonasjusten.com
           </a>
           <div class="preview">
-            <iframe src="https://jonasjusten.com/" loading="lazy" sandbox="allow-same-origin allow-scripts allow-forms allow-popups" title="preview of jonasjusten.com"></iframe>
+            <iframe data-src="https://jonasjusten.com/" loading="lazy" sandbox="allow-same-origin allow-scripts allow-forms allow-popups" title="preview of jonasjusten.com" fetchpriority="low"></iframe>
           </div>
           <p class="note mobile-note">mobile preview may be blocked; please open the link.</p>
         </article>
@@ -212,7 +224,7 @@
             sympaathy.com
           </a>
           <div class="preview">
-            <iframe src="https://sympaathy.com/" loading="lazy" sandbox="allow-same-origin allow-scripts allow-forms allow-popups" title="preview of sympaathy.com"></iframe>
+            <iframe data-src="https://sympaathy.com/" loading="lazy" sandbox="allow-same-origin allow-scripts allow-forms allow-popups" title="preview of sympaathy.com" fetchpriority="low"></iframe>
           </div>
         </article>
 
@@ -221,13 +233,39 @@
             cconnttacctto.xyz
           </a>
           <div class="preview">
-            <iframe src="https://cconnttacctto.xyz/" loading="lazy" sandbox="allow-same-origin allow-scripts allow-forms allow-popups" title="preview of cconnttacctto.xyz"></iframe>
+            <iframe data-src="https://cconnttacctto.xyz/" loading="lazy" sandbox="allow-same-origin allow-scripts allow-forms allow-popups" title="preview of cconnttacctto.xyz" fetchpriority="low"></iframe>
           </div>
         </article>
       </div>
     </section>
     <p class="note">if the preview does not load, please open the link.</p>
   </main>
+  <script>
+    // Lazy-load iframes when they approach the viewport to reduce initial load cost.
+    (function() {
+      const iframes = document.querySelectorAll('iframe[data-src]');
+      if (!('IntersectionObserver' in window)) {
+        iframes.forEach((frame) => frame.src = frame.dataset.src);
+        return;
+      }
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            const frame = entry.target;
+            frame.src = frame.dataset.src;
+            observer.unobserve(frame);
+          }
+        });
+      }, { rootMargin: '200px 0px' });
+      iframes.forEach((frame) => observer.observe(frame));
+      // Fallback: ensure they load after a short delay if not intersected (very short pages).
+      setTimeout(() => {
+        iframes.forEach((frame) => {
+          if (!frame.src) frame.src = frame.dataset.src;
+        });
+      }, 3000);
+    })();
+  </script>
 </body>
 </html>
 
